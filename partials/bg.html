@@ -3,11 +3,11 @@
         <div class="col-md-2">
             <!--Sidebar content-->
 
-            Search: <input ng-model="query">
-            Sort by:
+            <!--Search: <input ng-model="query">-->
+            Month:
             <select ng-model="orderProp">
-                <option value="name">Alphabetical</option>
-                <option value="age">Newest</option>
+                <option value="name">January</option>
+                <option value="age">February</option>
             </select>
 
         </div>
@@ -17,7 +17,7 @@
             <!--<p>{{data3}}</p>-->
             <!--<p>{{data}}</p>-->
             <!--<p>{{options}}</p>-->
-            <linechart data="data" options="options" mode="" width="900" height="900"></linechart>
+            <linechart data="data" options="options" mode="" width="900" height="500"></linechart>
         </div>
     </div>
 </div>

@@ -2,31 +2,29 @@
 
 /* Controllers */
 
-var phonecatControllers = angular.module('phonecatControllers', []);
+var controllers = angular.module('controllers', []);
 
-phonecatControllers.controller('PhoneListCtrl', ['$scope', 'Phone',
-  function($scope, Phone) {
-    $scope.phones = Phone.query();
-    $scope.orderProp = 'age';
-  }]);
+//phonecatControllers.controller('PhoneListCtrl', ['$scope', 'Phone',
+//    function($scope, Phone) {
+//        $scope.phones = Phone.query();
+//        $scope.orderProp = 'age';
+//    }]);
+//
+//phonecatControllers.controller('PhoneDetailCtrl', ['$scope', '$routeParams', 'Phone',
+//    function($scope, $routeParams, Phone) {
+//        $scope.phone = Phone.get({phoneId: $routeParams.phoneId}, function(phone) {
+//            $scope.mainImageUrl = phone.images[0];
+//        });
+//
+//        $scope.setImage = function(imageUrl) {
+//            $scope.mainImageUrl = imageUrl;
+//        }
+//    }]);
 
-phonecatControllers.controller('PhoneDetailCtrl', ['$scope', '$routeParams', 'Phone',
-  function($scope, $routeParams, Phone) {
-    $scope.phone = Phone.get({phoneId: $routeParams.phoneId}, function(phone) {
-      $scope.mainImageUrl = phone.images[0];
-    });
-
-    $scope.setImage = function(imageUrl) {
-      $scope.mainImageUrl = imageUrl;
-    }
-  }]);
-
-phonecatControllers.controller('BGCtrl', function($scope) {
+controllers.controller('BGCtrl', function($scope) {
     var data = [
         { TestTime: "00:02", TestDate: "2015-01-09", Result: 15.1, TestFlag: "Bedtime" },
         { TestTime: "00:02", TestDate: "2015-01-31", Result: 14.4, TestFlag: "Bedtime" },
-//        { TestTime: "00:04", TestDate: "2015-01-09", Result: 6.8, TestFlag: "Bedtime" },
-//        { TestTime: "00:04", TestDate: "2015-01-31", Result: 3.0 }
         { TestTime: "00:04", TestDate: "2015-01-19", Result: 6.8, TestFlag: "Bedtime" },
         { TestTime: "00:04", TestDate: "2015-01-30", Result: 3.0 },
         { TestTime: "00:06", TestDate: "2015-01-24", Result: 6.7, TestFlag: "Bedtime" },
@@ -481,15 +479,13 @@ phonecatControllers.controller('BGCtrl', function($scope) {
         var transformed;
         if (!(timeAsNumber in data2)) {
             transformed = { x: timeAsNumber };
-//            data2[bg.TestTime] = transformed;
             data2[timeAsNumber] = transformed;
         }
         else {
-//            transformed = data2[bg.TestTime];
             transformed = data2[timeAsNumber];
         }
 
-        var key = bg.TestDate.replace(/-/g, '');
+        var key = bg.TestDate;
         transformed[key] = bg.Result;
 
         dates.push(key);
@@ -508,23 +504,30 @@ phonecatControllers.controller('BGCtrl', function($scope) {
         return dates.indexOf(elem) == pos;
     });
 
-    var options = {
-        axes: {
-            x: {key: 'x', labelFunction: function(value) {return value;}, type: 'linear'},//, min: 0, max: 1439},
-            y: {type: 'linear', ticks: 5, min: 0, max: 20},
-        },
-        series: [
-//            {y: '20150109', color: 'steelblue', thickness: '2px' }
-        ]
-        /*lineMode: 'linear',
-        tension: 0.7,
-        tooltip: {mode: 'scrubber', formatter: function(x, y, series) {return 'pouet';}},
-        drawLegend: true,
-        drawDots: true,
-        columnsHGap: 5*/
+    function time_to_string(time) {
+        var hours = Math.floor(time / 60).toString();
+        if (hours.length < 2) hours = '0' + hours;
+
+        var mins = (time % 60).toString();
+        if (mins.length < 2) mins = '0' + mins;
+
+        return hours + ':' + mins;
     }
 
-    for (var i=0; i<dates.length && i < 4; i++) {
+    var options = {
+        axes: {
+            x: {key: 'x', labelFunction: time_to_string, type: 'linear', min: 0, max: 1440, ticks:[0,240,480,720,960,1200]},
+            y: {type: 'linear', ticks: 5, min: 0, max: 20},
+        },
+        series: [],
+        tooltip: {mode: 'scrubber', formatter: function(x, y, series) {
+            var date = series.y;
+            return date + ' ' + time_to_string(x) + ' - ' + y;
+        }},
+        drawLegend: true
+    }
+
+    for (var i=0; i<dates.length; i++) {
         options.series.push({y: dates[i], thickness: '2px',  label: dates[i]});
     }
 
