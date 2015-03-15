@@ -1,0 +1,23 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <!--Sidebar content-->
+
+            Search: <input ng-model="query">
+            Sort by:
+            <select ng-model="orderProp">
+                <option value="name">Alphabetical</option>
+                <option value="age">Newest</option>
+            </select>
+
+        </div>
+        <div class="col-md-10">
+            <!--<p>{{data1}}</p>-->
+            <!--<p>{{data2}}</p>-->
+            <!--<p>{{data3}}</p>-->
+            <!--<p>{{data}}</p>-->
+            <!--<p>{{options}}</p>-->
+            <linechart data="data" options="options" mode="" width="900" height="900"></linechart>
+        </div>
+    </div>
+</div>
