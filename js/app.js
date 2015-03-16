@@ -9,7 +9,8 @@ var phonecatApp = angular.module('phonecatApp', [
 
   'controllers',
   'phonecatFilters',
-  'phonecatServices'
+  'phonecatServices',
+  'mgcrea.ngStrap'
 ]);
 
 phonecatApp.config(['$routeProvider',
