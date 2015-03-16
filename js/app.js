@@ -23,11 +23,15 @@ phonecatApp.config(['$routeProvider',
 //        templateUrl: 'partials/phone-detail.html',
 //        controller: 'PhoneDetailCtrl'
 //      }).
-      when('/', {
-            templateUrl: 'partials/bg.html',
+      when('/bg', {
+        templateUrl: 'partials/bg.html',
+        controller: 'BGCtrl'
+      }).
+        when('/data', {
+            templateUrl: 'partials/data.html',
             controller: 'BGCtrl'
-        })
-//      .otherwise({
-//        redirectTo: '/phones'
-//        });
+        }).
+      otherwise({
+        redirectTo: '/bg'
+        });
   }]);

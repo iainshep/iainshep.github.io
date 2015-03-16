@@ -1,0 +1,98 @@
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+
+<p>Below is the Transact-SQL which extracts the data.</p>
+<p>The meter manufacturer's software saves its data in an embedded SQL Server database. I figured out
+    how to connect to this and get the data I want.</p>
+<p>For now I manually (1) run the SQL by hand, save to CSV, (2) transform it into JSON using a text editor, <a href="js/controllers.js">(3) paste it into controllers.js</a>.
+   For a future improvement I'd do all that dynamically in Java on the server.</p>
+
+<pre>
+
+-- Flags - Includes: slowbolus type & start/stop, TBR start & stop, which basal profile is being used,
+--    flag(s) on the BG test result
+select
+	rrq.ResultID,
+	rq.CustomName as Flag
+into #FlagsWeWant
+from
+	CsSchema.CsResultResultQualifier rrq
+	left join CsSchema.CsResultQualifier rq
+		on rrq.ResultQualifierID = rq.ResultQualifierID
+			left join CsSchema.CsResultQualifierType rqt
+				on rq.ResultQualifierTypeID = rqt.ResultQualifierTypeID
+where
+	isnull(rq.CustomName,'') not in ('MTR CMD',
+        'cdf.resq.upr.flag.basal.real',
+        'cdf.resq.upr.bolus.type.standard',
+        'cdf.resq.upr.slowbolus.type.multiwave' -- Most slowboluses are this type, flag any that aren't
+    )
+	and not (
+        isnull(rqt.TypeKey,'') = 'cdf.rqtype.upr.basal.profile' and rq.CustomName = '1'
+    ) -- Filter out that I'm using 1st basal profile, as I use no other for now
+
+
+
+-- All data I might want in near future
+select --*,--distinct dt.TypeKey
+	--/*
+	r.ResultID, r.ResultDate,
+	--HasValue,
+	Duration,
+	case
+		when dt.TypeKey = 'cdf.dat.bg' and rt.TypeKey = 'cdf.res.measurement'
+			then round(DataValue / 18.016, 1) -- Convert mg/dl to mmol/l
+		else DataValue
+	end as DataValue,
+	--dst.TypeKey as DataSourceTypeKey, --BG meter or pump
+	DataDownloadID,
+	--dt.TypeKey, dt.CustomName, rt.TypeKey,
+	st.TypeKey as SlotTypeKey,
+	case
+	    when dt.TypeKey = 'cdf.dat.bg' and rt.TypeKey = 'cdf.res.measurement' then 'BG'
+	    when dt.TypeKey = 'cdf.dat.carbohydrates' and rt.TypeKey = 'cdf.res.measurement' then 'Carbs'
+	    when dt.TypeKey = 'cdf.dat.insulin.dose' and rt.TypeKey in ('cdf.res.monitoring.upr.bolus', 'cdf.res.monitoring.upr.slowbolus') then 'Bolus'
+	    when dt.TypeKey = 'cdf.dat.insulin.rate' and rt.TypeKey = 'cdf.res.monitoring.upr.basal' then 'Basal'
+	    when dt.TypeKey = 'cdf.dat.relative.factor' and rt.TypeKey = 'cdf.res.monitoring.upr.tmpbasal' then 'TBR'
+	    else dt.TypeKey + ' ' + rt.TypeKey
+	end as DataType,
+	fww.Flag
+--*/
+into #ProcessedData
+from CsSchema.CsResult r
+	left join CsSchema.CsResultType rt
+		on r.ResultTypeID = rt.ResultTypeID
+	left join CsSchema.CsDataType dt
+		on r.DataTypeID = dt.DataTypeID
+	--left join CsSchema.CsDataSourceType dst
+	--	on r.DataSourceTypeID = dst.DataSourceTypeID
+	left join CsSchema.CsSlotType st
+		on r.SlotTypeID = st.SlotTypeID
+	left join #FlagsWeWant fww
+		on r.ResultID = fww.ResultID
+
+where
+	isnull(Hasvalue,'') != 'N'
+	--and dt.TypeKey = 'cdf.dat.bg' and rt.TypeKey = 'cdf.res.measurement' -- Blood Glucose
+	--and dt.TypeKey = 'cdf.dat.insulin.rate' and rt.TypeKey = 'cdf.res.monitoring.upr.basal' -- Basal
+	--and dt.TypeKey = 'cdf.dat.insulin.dose' --Bolus
+	--and dt.TypeKey = 'cdf.dat.carbohydrates' --Carbs
+	--and dt.TypeKey = 'cdf.dat.relative.factor' and rt.TypeKey = 'cdf.res.monitoring.upr.tmpbasal' -- Temp Basal Rate (?)
+	and not (isnull(dt.typeKey,'') = 'cdf.dat.insulin.tdd' and isnull(rt.TypeKey,'') = 'cdf.res.monitoring.upr.day') -- Total Daily Dose
+
+order by r.ResultDate desc, DataType, fww.Flag, r.ResultID
+
+
+
+-- RESULT: BLOOD GLUCOSE
+-- ---------------------
+select convert(varchar(10), ResultDate, 120) as Date,
+substring(convert(varchar(16), ResultDate, 120),12,5) as Time,
+cast(DataValue as numeric(5,1)) as BG,
+isnull(Flag,'') from #ProcessedData
+where DataType = 'BG' and ResultDate > '2015-01-01' and isnull(Flag,'') != 'Premenstrual'
+order by ResultDate
+
+</pre>
+        <!--</div>-->
+    <!--</div>-->
+</div>
