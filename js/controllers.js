@@ -2,6 +2,14 @@
 
 /* Controllers */
 
+//function HeaderController($scope, $location)
+//{
+//    $scope.isActive = function (viewLocation) {
+//        return $location.path().indexOf(viewLocation) == 0;
+//    }
+//}
+
+
 var controllers = angular.module('controllers', []);
 
 //phonecatControllers.controller('PhoneListCtrl', ['$scope', 'Phone',
@@ -517,7 +525,7 @@ controllers.controller('BGCtrl', function($scope) {
     var options = {
         axes: {
             x: {key: 'x', labelFunction: time_to_string, type: 'linear', min: 0, max: 1440, ticks:[0,240,480,720,960,1200]},
-            y: {type: 'linear', ticks: 5, min: 0, max: 20},
+            y: {type: 'linear', min: 0, max: 20, ticks:[0,4,7,10,15,20]},
         },
         series: [],
         tooltip: {mode: 'scrubber', formatter: function(x, y, series) {
@@ -532,5 +540,34 @@ controllers.controller('BGCtrl', function($scope) {
     }
 
     $scope.options = options;
+
+    $scope.weekchoices = [
+        { Label: "(all)",        Start: "2013-01-01", End: "2015-03-03" },
+        { Label: "5-11 Jan",     Start: "2015-01-05", End: "2015-01-11" },
+        { Label: "12-18 Jan",    Start: "2015-01-12", End: "2015-01-18" },
+        { Label: "19-25 Jan",    Start: "2015-01-19", End: "2015-01-25" },
+        { Label: "26 Jan-1 Feb", Start: "2015-01-26", End: "2015-02-01" },
+        { Label: "2-8 Feb",      Start: "2015-02-02", End: "2015-02-08" },
+        { Label: "9-15 Feb",     Start: "2015-02-09", End: "2015-02-15" },
+        { Label: "16-22 Feb",    Start: "2015-02-16", End: "2015-02-22" },
+        { Label: "23 Feb-1 Mar", Start: "2015-02-23", End: "2015-03-01" }
+    ]
+
+    var changedDateFilter = function(weekchoice) {
+//        alert(weekchoice.Label);
+        var serieses = $scope.options.series;
+        for (var i=0; i<serieses.length; i++) {
+            var activate = serieses[i].y >= weekchoice.Start && serieses[i].y <= weekchoice.End;
+            serieses[i].visible = activate;
+        }
+//        alert("Done");
+    }
+    $scope.changedDateFilter = changedDateFilter;
+
+    $scope.dateFilter = $scope.weekchoices[1];
+    changedDateFilter($scope.dateFilter);
+
+
+
 });
 

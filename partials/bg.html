@@ -1,23 +1,22 @@
-<div class="container-fluid">
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="row">
-        <div class="col-md-2">
-            <!--Sidebar content-->
+        <!--<div class="col-md-2">-->
+            <!--&lt;!&ndash;Sidebar content&ndash;&gt;-->
 
-            <!--Search: <input ng-model="query">-->
-            Month:
-            <select ng-model="orderProp">
-                <option value="name">January</option>
-                <option value="age">February</option>
-            </select>
+            <!--&lt;!&ndash;Search: <input ng-model="query">&ndash;&gt;-->
 
-        </div>
-        <div class="col-md-10">
-            <!--<p>{{data1}}</p>-->
-            <!--<p>{{data2}}</p>-->
-            <!--<p>{{data3}}</p>-->
-            <!--<p>{{data}}</p>-->
-            <!--<p>{{options}}</p>-->
-            <linechart data="data" options="options" mode="" width="900" height="500"></linechart>
+        <!--</div>-->
+        <div class="col-md-12">
+            <p>
+                Made with
+                <a href="http://angularjs.org/">angular.js</a>,
+                <a href="http://n3-charts.github.io/">n3-charts</a>,
+                <a href="http://getbootstrap.com/">bootstrap</a>.
+            </p>
+            <p>Filter:&nbsp;<select ng-model="dateFilter" ng-change="changedDateFilter(dateFilter)"
+                    data-ng-options="dates as dates.Label for dates in weekchoices"
+                    ></select></p>
+            <linechart data="data" options="options" height="500"></linechart>
         </div>
     </div>
 </div>
